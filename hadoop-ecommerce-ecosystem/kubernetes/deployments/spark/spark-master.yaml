@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-master
+  namespace: hadoop-ecosystem
+  labels:
+    app: spark
+    component: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark
+      component: master
+  template:
+    metadata:
+      labels:
+        app: spark
+        component: master
+    spec:
+      hostname: spark-master
+      containers:
+      - name: spark-master
+        image: spark:3.4.1
+        imagePullPolicy: Always
+        command: ["/scripts/start-master.sh"]
+        ports:
+        - containerPort: 8080
+          name: webui-port
+        - containerPort: 7077
+          name: master-port
+        env:
+        - name: SPARK_MODE
+          value: "master"
+        - name: SPARK_MASTER_HOST
+          value: "0.0.0.0"
+        - name: SPARK_MASTER_PORT
+          value: "7077"
+        - name: SPARK_MASTER_WEBUI_PORT
+          value: "8080"
+        - name: JAVA_HOME
+          value: "/usr/local/openjdk-8"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: spark-config
+          mountPath: /opt/spark/conf
+        - name: spark-scripts
+          mountPath: /scripts
+        - name: spark-logs
+          mountPath: /opt/spark/logs
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: spark-config
+        configMap:
+          name: spark-config
+      - name: spark-scripts
+        configMap:
+          name: spark-scripts
+          defaultMode: 0755
+      - name: spark-logs
+        emptyDir: {}
+      nodeSelector:
+        node-role: master

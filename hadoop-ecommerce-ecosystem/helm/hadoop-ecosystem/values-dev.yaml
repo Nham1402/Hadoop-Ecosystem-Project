@@ -1,0 +1,163 @@
+# Development environment values
+# Reduced resource requirements for development
+
+# Override global settings for dev
+global:
+  imageRegistry: "localhost:5000"
+  imagePullPolicy: IfNotPresent
+
+# Reduced resources for development
+resources:
+  master:
+    memory: "4Gi"
+    cpu: "2"
+  worker:
+    memory: "2Gi"
+    cpu: "1"
+    replicas: 1
+
+# Hadoop dev configuration
+hadoop:
+  namenode:
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+    storage:
+      size: "20Gi"
+      
+  datanode:
+    replicas: 1
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+    storage:
+      size: "50Gi"
+      
+  resourcemanager:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.25"
+      limits:
+        memory: "1Gi"
+        cpu: "0.5"
+        
+  nodemanager:
+    replicas: 1
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+# Spark dev configuration
+spark:
+  master:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.25"
+      limits:
+        memory: "1Gi"
+        cpu: "0.5"
+        
+  worker:
+    replicas: 1
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+# Kafka dev configuration
+kafka:
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "0.25"
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+  storage:
+    size: "10Gi"
+
+# Zookeeper dev configuration
+zookeeper:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "0.1"
+    limits:
+      memory: "512Mi"
+      cpu: "0.25"
+  storage:
+    size: "5Gi"
+
+# PostgreSQL dev configuration
+postgresql:
+  primary:
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "0.1"
+      limits:
+        memory: "512Mi"
+        cpu: "0.25"
+    persistence:
+      size: "10Gi"
+
+# Monitoring dev configuration
+monitoring:
+  prometheus:
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "0.1"
+      limits:
+        memory: "512Mi"
+        cpu: "0.25"
+    storage:
+      size: "10Gi"
+      
+  grafana:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "0.05"
+      limits:
+        memory: "256Mi"
+        cpu: "0.1"
+
+# Disable some components for dev
+hbase:
+  enabled: false
+  
+# Simplified ingress for dev
+ingress:
+  enabled: true
+  hosts:
+    - host: hadoop-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: hadoop-namenode
+          port: 9870
+    - host: spark-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spark-master
+          port: 8080

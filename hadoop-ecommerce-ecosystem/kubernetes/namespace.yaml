@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hadoop-ecosystem
+  labels:
+    name: hadoop-ecosystem
+    purpose: big-data-analytics
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: hadoop-ecosystem-quota
+  namespace: hadoop-ecosystem
+spec:
+  hard:
+    requests.cpu: "7"
+    requests.memory: 14Gi
+    limits.cpu: "7"
+    limits.memory: 14Gi
+    persistentvolumeclaims: "20"
+    services: "20"
+    secrets: "10"
+    configmaps: "10"
