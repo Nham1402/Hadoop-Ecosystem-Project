@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hadoop-namenode
+  namespace: hadoop-ecosystem
+  labels:
+    app: hadoop
+    component: namenode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop
+      component: namenode
+  template:
+    metadata:
+      labels:
+        app: hadoop
+        component: namenode
+    spec:
+      hostname: namenode
+      containers:
+      - name: namenode
+        image: hadoop-base:3.3.4
+        imagePullPolicy: Always
+        command: ["/scripts/start-namenode.sh"]
+        ports:
+        - containerPort: 8020
+          name: fs-port
+        - containerPort: 9870
+          name: http-port
+        env:
+        - name: CLUSTER_NAME
+          value: "hadoop-cluster"
+        - name: HADOOP_HOME
+          value: "/opt/hadoop"
+        - name: JAVA_HOME
+          value: "/usr/local/openjdk-8"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            memory: "6Gi"
+            cpu: "3"
+        volumeMounts:
+        - name: namenode-storage
+          mountPath: /hadoop/dfs/name
+        - name: hadoop-config
+          mountPath: /opt/hadoop/etc/hadoop
+        - name: hadoop-scripts
+          mountPath: /scripts
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9870
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9870
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: namenode-storage
+        persistentVolumeClaim:
+          claimName: namenode-pvc
+      - name: hadoop-config
+        configMap:
+          name: hadoop-config
+      - name: hadoop-scripts
+        configMap:
+          name: hadoop-scripts
+          defaultMode: 0755
+      nodeSelector:
+        node-role: master
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yarn-resourcemanager
+  namespace: hadoop-ecosystem
+  labels:
+    app: hadoop
+    component: resourcemanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop
+      component: resourcemanager
+  template:
+    metadata:
+      labels:
+        app: hadoop
+        component: resourcemanager
+    spec:
+      hostname: resourcemanager
+      containers:
+      - name: resourcemanager
+        image: hadoop-base:3.3.4
+        imagePullPolicy: Always
+        command: ["/scripts/start-resourcemanager.sh"]
+        ports:
+        - containerPort: 8088
+          name: webapp-port
+        - containerPort: 8032
+          name: scheduler-port
+        env:
+        - name: SERVICE_PRECONDITION
+          value: "namenode:9870"
+        - name: HADOOP_HOME
+          value: "/opt/hadoop"
+        - name: JAVA_HOME
+          value: "/usr/local/openjdk-8"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: hadoop-config
+          mountPath: /opt/hadoop/etc/hadoop
+        - name: hadoop-scripts
+          mountPath: /scripts
+        readinessProbe:
+          httpGet:
+            path: /ws/v1/cluster/info
+            port: 8088
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /ws/v1/cluster/info
+            port: 8088
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: hadoop-config
+        configMap:
+          name: hadoop-config
+      - name: hadoop-scripts
+        configMap:
+          name: hadoop-scripts
+          defaultMode: 0755
+      nodeSelector:
+        node-role: master

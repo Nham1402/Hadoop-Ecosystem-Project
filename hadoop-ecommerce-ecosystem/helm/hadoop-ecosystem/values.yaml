@@ -1,0 +1,381 @@
+# Default values for hadoop-ecosystem
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  imageRegistry: "localhost:5000"
+  imagePullPolicy: Always
+  storageClass: "local-storage"
+  
+# Namespace
+namespace:
+  name: hadoop-ecosystem
+  create: true
+
+# Resource quotas for the cluster
+resources:
+  master:
+    memory: "6Gi"
+    cpu: "3"
+  worker:
+    memory: "4Gi"
+    cpu: "2"
+    replicas: 2
+
+# Hadoop configuration
+hadoop:
+  enabled: true
+  namenode:
+    image:
+      repository: hadoop-base
+      tag: "3.3.4"
+    resources:
+      requests:
+        memory: "4Gi"
+        cpu: "2"
+      limits:
+        memory: "6Gi"
+        cpu: "3"
+    storage:
+      size: "50Gi"
+    nodeSelector:
+      node-role: master
+      
+  datanode:
+    image:
+      repository: hadoop-base
+      tag: "3.3.4"
+    replicas: 2
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+    storage:
+      size: "100Gi"
+    nodeSelector:
+      node-role: worker
+      
+  resourcemanager:
+    image:
+      repository: hadoop-base
+      tag: "3.3.4"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+    nodeSelector:
+      node-role: master
+      
+  nodemanager:
+    image:
+      repository: hadoop-base
+      tag: "3.3.4"
+    replicas: 2
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+    nodeSelector:
+      node-role: worker
+
+# Spark configuration
+spark:
+  enabled: true
+  master:
+    image:
+      repository: spark
+      tag: "3.4.1"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+    nodeSelector:
+      node-role: master
+      
+  worker:
+    image:
+      repository: spark
+      tag: "3.4.1"
+    replicas: 2
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1"
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+    nodeSelector:
+      node-role: worker
+
+# Kafka configuration
+kafka:
+  enabled: true
+  image:
+    repository: confluentinc/cp-kafka
+    tag: "7.4.0"
+  replicas: 1
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "0.5"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  storage:
+    size: "50Gi"
+
+# Zookeeper configuration (external dependency)
+zookeeper:
+  enabled: true
+  image:
+    repository: confluentinc/cp-zookeeper
+    tag: "7.4.0"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "0.25"
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+  storage:
+    size: "10Gi"
+
+# Hive configuration
+hive:
+  enabled: true
+  metastore:
+    image:
+      repository: hive
+      tag: "3.1.3"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+        
+  server:
+    image:
+      repository: hive
+      tag: "3.1.3"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+# HBase configuration
+hbase:
+  enabled: true
+  master:
+    image:
+      repository: hbase
+      tag: "2.5.5"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+        
+  regionserver:
+    image:
+      repository: hbase
+      tag: "2.5.5"
+    replicas: 2
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+# PostgreSQL configuration (external dependency)
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    username: "hive"
+    password: "hivepassword"
+    database: "metastore"
+  primary:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.25"
+      limits:
+        memory: "1Gi"
+        cpu: "0.5"
+    persistence:
+      enabled: true
+      size: "20Gi"
+
+# Airflow configuration
+airflow:
+  enabled: true
+  webserver:
+    image:
+      repository: airflow
+      tag: "2.7.1"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+        
+  scheduler:
+    image:
+      repository: airflow
+      tag: "2.7.1"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    image:
+      repository: prom/prometheus
+      tag: "v2.45.0"
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.25"
+      limits:
+        memory: "1Gi"
+        cpu: "0.5"
+    storage:
+      size: "20Gi"
+      
+  grafana:
+    enabled: true
+    image:
+      repository: grafana/grafana
+      tag: "10.1.0"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "0.1"
+      limits:
+        memory: "512Mi"
+        cpu: "0.25"
+    adminPassword: "admin"
+
+# Service configuration
+service:
+  type: ClusterIP
+  
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: hadoop.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: hadoop-namenode
+          port: 9870
+    - host: spark.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spark-master
+          port: 8080
+    - host: airflow.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: airflow-webserver
+          port: 8080
+    - host: grafana.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: grafana
+          port: 3000
+  tls:
+    - secretName: hadoop-ecosystem-tls
+      hosts:
+        - hadoop.local
+        - spark.local
+        - airflow.local
+        - grafana.local
+
+# Security settings
+security:
+  enabled: false
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name: ""
+  
+# Network policies
+networkPolicy:
+  enabled: false
+
+# Persistence settings
+persistence:
+  storageClass: "local-storage"
+  accessMode: ReadWriteOnce
+
+# Configuration for different environments
+environments:
+  dev:
+    resources:
+      master:
+        memory: "4Gi"
+        cpu: "2"
+      worker:
+        memory: "2Gi"
+        cpu: "1"
+        replicas: 1
+  
+  staging:
+    resources:
+      master:
+        memory: "6Gi"
+        cpu: "3"
+      worker:
+        memory: "4Gi"
+        cpu: "2"
+        replicas: 2
+        
+  production:
+    resources:
+      master:
+        memory: "8Gi"
+        cpu: "4"
+      worker:
+        memory: "6Gi"
+        cpu: "3"
+        replicas: 3
