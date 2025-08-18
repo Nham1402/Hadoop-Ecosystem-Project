@@ -1,0 +1,14 @@
+topics:
+  - name: user-events
+    partitions: 3
+    replication_factor: 1
+    config:
+      cleanup.policy: delete
+      retention.ms: 604800000
+  - name: transactions
+    partitions: 3
+    replication_factor: 1
+  - name: inventory
+    partitions: 1
+    replication_factor: 1
+
