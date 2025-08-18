@@ -10,6 +10,11 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
       - zk1-data:/bitnami
+    ports:
+      - target: 2181
+        published: 2181
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:
@@ -24,6 +29,11 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
       - zk2-data:/bitnami
+    ports:
+      - target: 2181
+        published: 2181
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:
@@ -38,6 +48,11 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
       - zk3-data:/bitnami
+    ports:
+      - target: 2181
+        published: 2181
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:

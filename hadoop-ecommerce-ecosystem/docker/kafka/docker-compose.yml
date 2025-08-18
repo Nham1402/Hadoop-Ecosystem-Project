@@ -14,6 +14,11 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
     volumes:
       - kafka1-data:/bitnami/kafka
+    ports:
+      - target: 29092
+        published: 29092
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:
@@ -34,6 +39,11 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
     volumes:
       - kafka2-data:/bitnami/kafka
+    ports:
+      - target: 29092
+        published: 29092
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:
@@ -54,6 +64,11 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
     volumes:
       - kafka3-data:/bitnami/kafka
+    ports:
+      - target: 29092
+        published: 29092
+        protocol: tcp
+        mode: host
     networks: [kafka-net]
     deploy:
       placement:
