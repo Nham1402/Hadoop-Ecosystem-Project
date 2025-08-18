@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  trino-coordinator:
+    image: trinodb/trino:443
+    ports:
+      - "8082:8080"
+    volumes:
+      - trino-data:/data
+      - ./etc:/etc/trino:ro
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.trino.role == coordinator]
+
+  trino-worker:
+    image: trinodb/trino:443
+    volumes:
+      - ./etc:/etc/trino:ro
+    networks: [data-net]
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.labels.trino.role == worker]
+
+volumes:
+  trino-data: { external: true }
+networks:
+  data-net: { external: true }
+

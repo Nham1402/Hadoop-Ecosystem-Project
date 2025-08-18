@@ -1,0 +1,56 @@
+version: "3.8"
+services:
+  zk1:
+    image: bitnami/zookeeper:3.9
+    environment:
+      - ZOO_SERVER_ID=1
+      - ZOO_SERVERS=0.0.0.0:2888:3888 master:2888:3888 worker1:2888:3888 worker2:2888:3888
+      - ZOO_CLIENT_PORT=2181
+      - ZOO_TICK_TIME=2000
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zk1-data:/bitnami
+    networks: [kafka-net]
+    deploy:
+      placement:
+        constraints:
+          - node.labels.zk.id == 1
+  zk2:
+    image: bitnami/zookeeper:3.9
+    environment:
+      - ZOO_SERVER_ID=2
+      - ZOO_SERVERS=master:2888:3888 0.0.0.0:2888:3888 worker2:2888:3888
+      - ZOO_CLIENT_PORT=2181
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zk2-data:/bitnami
+    networks: [kafka-net]
+    deploy:
+      placement:
+        constraints:
+          - node.labels.zk.id == 2
+  zk3:
+    image: bitnami/zookeeper:3.9
+    environment:
+      - ZOO_SERVER_ID=3
+      - ZOO_SERVERS=master:2888:3888 worker1:2888:3888 0.0.0.0:2888:3888
+      - ZOO_CLIENT_PORT=2181
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zk3-data:/bitnami
+    networks: [kafka-net]
+    deploy:
+      placement:
+        constraints:
+          - node.labels.zk.id == 3
+volumes:
+  zk1-data:
+    external: true
+  zk2-data:
+    external: true
+  zk3-data:
+    external: true
+networks:
+  kafka-net:
+    external: true
+
