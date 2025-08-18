@@ -1,0 +1,4 @@
+{"user_id": 1, "event": "view", "product_id": 101, "ts": "2024-04-01T09:59:00Z"}
+{"user_id": 1, "event": "add_to_cart", "product_id": 103, "ts": "2024-04-02T08:00:00Z"}
+{"user_id": 2, "event": "view", "product_id": 102, "ts": "2024-04-02T11:00:00Z"}
+{"user_id": 3, "event": "purchase", "product_id": 101, "ts": "2024-04-03T13:40:00Z"}

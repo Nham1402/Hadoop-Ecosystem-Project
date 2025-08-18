@@ -1,0 +1,5 @@
+txn_id,order_id,amount,payment_method,status,created_at
+90001,5001,699.0,card,success,2024-04-01T10:00:00Z
+90002,5002,98.0,card,success,2024-04-02T09:00:00Z
+90003,5003,1199.0,card,success,2024-04-02T11:30:00Z
+90004,5004,699.0,card,success,2024-04-03T13:45:00Z
