@@ -1,7 +1,0 @@
-global:
-  scrape_interval: 15s
-scrape_configs:
-  - job_name: 'node'
-    static_configs:
-      - targets: ['master:9100','worker1:9100','worker2:9100']
-
