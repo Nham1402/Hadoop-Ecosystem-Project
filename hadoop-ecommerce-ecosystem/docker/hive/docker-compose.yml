@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  hive-metastore-db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+    volumes:
+      - hive-metastore-pg:/var/lib/postgresql/data
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    environment:
+      HIVE_METASTORE_DB_TYPE: postgres
+      HIVE_JDBC_URL: jdbc:postgresql://hive-metastore-db:5432/metastore
+      HIVE_DB_USER: hive
+      HIVE_DB_PASSWORD: hive
+      SERVICE_NAME: metastore
+    depends_on: [hive-metastore-db]
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    environment:
+      SERVICE_NAME: hive-server
+      HIVE_METASTORE_URI: thrift://hive-metastore:9083
+    depends_on: [hive-metastore]
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+volumes:
+  hive-metastore-pg: { external: true }
+networks:
+  data-net: { external: true }
+

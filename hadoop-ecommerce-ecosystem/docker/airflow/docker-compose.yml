@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  airflow-db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  airflow-redis:
+    image: redis:6
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  airflow-webserver:
+    image: apache/airflow:2.9.2
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@airflow-db:5432/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://airflow-redis:6379/0
+      - AIRFLOW__WEBSERVER__RBAC=True
+    volumes:
+      - ../../airflow/dags:/opt/airflow/dags
+      - ../../airflow/plugins:/opt/airflow/plugins
+    ports:
+      - "8080:8080"
+    depends_on: [airflow-db, airflow-redis]
+    command: bash -lc "airflow db upgrade && airflow users create --role Admin --username admin --password admin --firstname a --lastname b --email admin@example.com || true && airflow webserver"
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.2
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@airflow-db:5432/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://airflow-redis:6379/0
+    volumes:
+      - ../../airflow/dags:/opt/airflow/dags
+      - ../../airflow/plugins:/opt/airflow/plugins
+    depends_on: [airflow-db, airflow-redis, airflow-webserver]
+    command: bash -lc "airflow scheduler"
+    networks: [data-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+networks:
+  data-net: { external: true }
+

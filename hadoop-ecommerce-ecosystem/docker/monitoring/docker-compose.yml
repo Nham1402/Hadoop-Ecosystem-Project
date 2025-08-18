@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks: [monitoring-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  grafana:
+    image: grafana/grafana:10.4.5
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks: [monitoring-net]
+    deploy:
+      placement:
+        constraints: [node.labels.role == master]
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    command:
+      - --path.rootfs=/
+    pid: "host"
+    network_mode: "host"
+    volumes:
+      - /:/host:ro,rslave
+    deploy:
+      mode: global
+
+volumes:
+  prometheus-data: { external: true }
+  grafana-data: { external: true }
+networks:
+  monitoring-net: { external: true }
+
