@@ -4,7 +4,7 @@ services:
     image: bitnami/zookeeper:3.9
     environment:
       - ZOO_SERVER_ID=1
-      - ZOO_SERVERS=0.0.0.0:2888:3888 master:2888:3888 worker1:2888:3888 worker2:2888:3888
+      - ZOO_SERVERS=0.0.0.0:2888:3888 zk2:2888:3888 zk3:2888:3888
       - ZOO_CLIENT_PORT=2181
       - ZOO_TICK_TIME=2000
       - ALLOW_ANONYMOUS_LOGIN=yes
@@ -24,7 +24,7 @@ services:
     image: bitnami/zookeeper:3.9
     environment:
       - ZOO_SERVER_ID=2
-      - ZOO_SERVERS=master:2888:3888 0.0.0.0:2888:3888 worker2:2888:3888
+      - ZOO_SERVERS=zk1:2888:3888 0.0.0.0:2888:3888 zk3:2888:3888
       - ZOO_CLIENT_PORT=2181
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
@@ -43,7 +43,7 @@ services:
     image: bitnami/zookeeper:3.9
     environment:
       - ZOO_SERVER_ID=3
-      - ZOO_SERVERS=master:2888:3888 worker1:2888:3888 0.0.0.0:2888:3888
+      - ZOO_SERVERS=zk1:2888:3888 zk2:2888:3888 0.0.0.0:2888:3888
       - ZOO_CLIENT_PORT=2181
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
