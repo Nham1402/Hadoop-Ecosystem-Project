@@ -26,9 +26,12 @@ fi
 MASTER_IP="192.168.235.136"
 echo "🖥️  Master Node IP: $MASTER_IP"
 
-# Kiểm tra xem node đã là manager chưa
-if docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
-    echo "⚠️  Docker Swarm đã được khởi tạo"
+# Kiểm tra trạng thái Swarm
+SWARM_STATE=$(docker info --format '{{.Swarm.LocalNodeState}}')
+NODE_ROLE=$(docker info --format '{{.Swarm.ControlAvailable}}')
+
+if [ "$SWARM_STATE" = "active" ] && [ "$NODE_ROLE" = "true" ]; then
+    echo "⚠️  Docker Swarm đã được khởi tạo (Node là Manager)"
     echo "📋 Thông tin cluster hiện tại:"
     docker node ls
 else
@@ -37,7 +40,7 @@ else
 fi
 
 echo ""
-echo "✅ Docker Swarm đã được khởi tạo thành công!"
+echo "✅ Docker Swarm đã sẵn sàng!"
 echo ""
 
 # Lấy join token cho worker nodes
@@ -49,8 +52,6 @@ echo "=========================================="
 echo "WORKER JOIN COMMANDS"
 echo "=========================================="
 echo ""
-echo "📝 Chạy các lệnh sau trên WORKER NODES:"
-echo ""
 echo "🖥️  WORKER NODE 1 (192.168.235.147):"
 echo "docker swarm join --token $WORKER_TOKEN $MASTER_IP:2377"
 echo ""
@@ -58,14 +59,20 @@ echo "🖥️  WORKER NODE 2 (192.168.235.148):"
 echo "docker swarm join --token $WORKER_TOKEN $MASTER_IP:2377"
 echo ""
 
-# Label master node
-echo "🏷️  Gắn label cho Master Node..."
-MASTER_NODE_ID=$(docker node ls --filter role=manager -q)
-docker node update --label-add role=master $MASTER_NODE_ID
+# Label master node (nếu là manager)
+if [ "$NODE_ROLE" = "true" ]; then
+    echo "🏷️  Gắn label cho Master Node..."
+    MASTER_NODE_ID=$(docker node ls --filter role=manager -q)
+    docker node update --label-add role=master $MASTER_NODE_ID
+fi
 
 echo ""
 echo "📊 Trạng thái cluster hiện tại:"
-docker node ls
+if [ "$NODE_ROLE" = "true" ]; then
+    docker node ls
+else
+    echo "⚠️ Node hiện tại không phải Manager, không thể hiển thị node list"
+fi
 
 # Tạo overlay network
 echo ""
