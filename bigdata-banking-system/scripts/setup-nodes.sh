@@ -65,11 +65,12 @@ echo ""
 for node_id in $(docker node ls -q); do
     hostname=$(docker node inspect $node_id --format "{{.Description.Hostname}}")
     role=$(docker node inspect $node_id --format "{{.Spec.Role}}")
-    labels=$(docker node inspect $node_id --format "{{range $key, $value := .Spec.Labels}}{{$key}}={{$value}} {{end}}")
+    labels=$(docker node inspect $node_id --format '{{json .Spec.Labels}}')
     echo "🖥️  Node: $hostname ($role)"
     echo "   Labels: $labels"
     echo ""
 done
+
 
 # Kiểm tra overlay network
 echo "🌐 Kiểm tra overlay network..."
