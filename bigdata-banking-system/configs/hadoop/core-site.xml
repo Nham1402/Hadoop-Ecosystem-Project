@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://192.168.235.136:9000</value>
+        <description>NameNode URI</description>
+    </property>
+    
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/hadoop/tmp</value>
+        <description>Temporary Directory for Hadoop</description>
+    </property>
+    
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>131072</value>
+        <description>Buffer size for use in sequence files</description>
+    </property>
+</configuration>
